@@ -3,44 +3,42 @@ import random
 from opcua import Server
 import datetime
 
+# create server
 server = Server()
 
-url = "opc.tcp://127.0.0.1:12345"
+# create server endpoint
+url = "opc.tcp://0.0.0.0:4840/opcua/server"
 server.set_endpoint(url)
 
+# create namespace
 name = "OPCUA_SERVER"
-address_space = server.register_namespace(name)
+idx = server.register_namespace(name)
 
+# get server objects node
 objects = server.get_objects_node()
 
-param = objects.add_object(address_space, "Parameters")
+# add objects {namespace, object name}
+param = objects.add_object(idx, "Parameters")
 
-temp = param.add_variable(address_space, "Temperature", 0)
-pressure = param.add_variable(address_space, "Pressure", 1)
-time = param.add_variable(address_space, "Time", 0)
+# add and initialise a variable to a specific object
+temp = param.add_variable(idx, "Temperature", 0)
 
+# set read write privileges for a variable
 temp.set_writable()
-pressure.set_writable()
-time.set_writable()
 
+# start server
 server.start()
+
 print()
 print(f"Server started at {url}")
 print()
 
 while True:
+    # generate random temperature values
     Temperature = random.uniform(22, 25)
-    Pressure = random.uniform(200, 500)
-    Time = datetime.datetime.now()
 
+    # update the temp variable
     temp.set_value(Temperature)
     print(f"New Temperature:  {temp.get_value():.2f}")
-
-    pressure.set_value(Pressure)
-    print(f"New Pressure: {pressure.get_value():.2f}")
-
-    time.set_value(Time)
-    print(f"New Time: {time.get_value()}")
     print()
-
     sleep(2)
